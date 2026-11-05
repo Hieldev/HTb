@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HToolbox – semua alat harian dalam satu aplikasi</title>
+<meta name="description" content="HToolbox: catatan, to-do, kalkulator, kalender, konverter mata uang, penerjemah, dan 16 alat PDF dalam satu aplikasi Android.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f6f7f9; --ink:#0f172a; --muted:#5b6475; --line:#e4e7ec;
+  --accent:#2563eb; --accent-ink:#ffffff; --phone:#0f172a; --screen:#ffffff;
+  --c-catatan:#d97706; --c-todo:#7c3aed; --c-kalk:#2563eb; --c-kal:#0d9488;
+  --c-uang:#db2777; --c-terj:#0891b2; --c-file:#0284c7; --c-set:#64748b;
+  --c-atur:#e5322d; --c-opt:#2fa84f; --c-ke:#f59e0b; --c-dari:#2d7ff9; --c-edit:#8b5cf6; --c-aman:#475569;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1020; --bg2:#111831; --ink:#eef1f7; --muted:#9aa4b8; --line:#232c47;
+    --accent:#5b8dff; --accent-ink:#0b1020; --phone:#1b2442; --screen:#0b1020;
+    --c-catatan:#f59e0b; --c-todo:#a78bfa; --c-kalk:#60a5fa; --c-kal:#2dd4bf;
+    --c-uang:#f472b6; --c-terj:#22d3ee; --c-file:#38bdf8; --c-set:#94a3b8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --bg2:#111831; --ink:#eef1f7; --muted:#9aa4b8; --line:#232c47;
+  --accent:#5b8dff; --accent-ink:#0b1020; --phone:#1b2442; --screen:#0b1020;
+  --c-catatan:#f59e0b; --c-todo:#a78bfa; --c-kalk:#60a5fa; --c-kal:#2dd4bf;
+  --c-uang:#f472b6; --c-terj:#22d3ee; --c-file:#38bdf8; --c-set:#94a3b8;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+main{flex:1}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding:72px 0}
+h1,h2,h3{margin:0;line-height:1.15;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,5.4vw,4rem);font-weight:800}
+h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:700}
+h3{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.lead{font-size:1.15rem;color:var(--muted);max-width:34em}
+
+/* header */
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;text-decoration:none;letter-spacing:-.02em;flex:none}
+.brand i{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center}
+.brand svg{width:18px;height:18px;stroke:var(--accent-ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav{display:flex;gap:6px;font-size:.95rem;font-weight:500;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{text-decoration:none;color:var(--muted);padding:8px 14px;border-radius:10px;white-space:nowrap}
+nav a:hover{color:var(--ink)}
+nav a[aria-current="page"]{color:var(--ink);background:var(--bg2);font-weight:600}
+
+/* ruang (view) */
+.view{display:none}
+.view.on{display:block}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:12px;font:600 1rem inherit;font-family:inherit;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn-main{background:var(--accent);color:var(--accent-ink)}
+.btn-main:hover{filter:brightness(1.08)}
+.btn-line{border-color:var(--line);color:var(--ink);background:transparent}
+.btn-line:hover{background:var(--bg2)}
+.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+
+/* hero */
+.hero{padding:56px 0 96px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.hero h1{margin-bottom:20px}
+.note{margin-top:18px;font-size:.9rem;color:var(--muted)}
+
+/* ikon */
+.ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);flex:none}
+.ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.k-catatan{--c:var(--c-catatan)}.k-todo{--c:var(--c-todo)}.k-kalk{--c:var(--c-kalk)}.k-kal{--c:var(--c-kal)}
+.k-uang{--c:var(--c-uang)}.k-terj{--c:var(--c-terj)}.k-file{--c:var(--c-file)}.k-set{--c:var(--c-set)}
+
+/* ponsel */
+.phone{justify-self:center;width:290px;border-radius:40px;background:var(--phone);padding:10px;box-shadow:0 30px 60px -30px rgba(15,23,42,.45)}
+.screen{background:var(--screen);border-radius:32px;padding:22px 16px 20px;min-height:520px}
+.screen .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.screen .top b{font-size:1.5rem;letter-spacing:-.02em}
+.screen .top span{width:30px;height:30px;border-radius:50%;background:var(--bg2);display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{border:1px solid var(--line);border-radius:16px;height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:.72rem;font-weight:600;text-align:center;padding:0 6px}
+.mini .ic{width:36px;height:36px;border-radius:50%}
+.mini .ic svg{width:18px;height:18px}
+
+/* alat */
+.head{max-width:36em;margin-bottom:48px}
+.head p{margin-top:14px;color:var(--muted);font-size:1.05rem}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.tool{padding:28px 24px 32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tool .ic{margin-bottom:18px}
+.tool p{margin-top:8px;color:var(--muted);font-size:.93rem}
+
+/* konverter file */
+.alt{background:var(--bg2)}
+.split{display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;align-items:start}
+.cats{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.cats li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}
+.cats b{display:flex;align-items:center;gap:10px;font-size:.95rem}
+.cats b::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--d);flex:none}
+.cats span{color:var(--muted);font-size:.95rem}
+.facts{display:flex;flex-direction:column;gap:14px;margin-top:28px;padding:0;list-style:none}
+.facts li{padding-left:22px;position:relative;color:var(--muted)}
+.facts li::before{content:"";position:absolute;left:0;top:.7em;width:10px;height:2px;background:var(--accent)}
+
+/* kustom */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.three p{margin-top:8px;color:var(--muted)}
+.swatch{display:flex;gap:6px;margin-bottom:18px}
+.swatch i{width:22px;height:22px;border-radius:50%;background:var(--s)}
+.lay{display:flex;gap:6px;margin-bottom:18px;height:22px}
+.lay i{width:22px;border:2px solid var(--ink);border-radius:5px;opacity:.75}
+.lay i:nth-child(2){width:34px}
+
+/* pembaruan */
+.log{max-width:760px;margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.rel{display:grid;grid-template-columns:150px 1fr;gap:24px;padding:32px 0;border-bottom:1px solid var(--line)}
+.ver{font-weight:800;font-size:1.3rem;letter-spacing:-.02em}
+.ver small{display:block;margin-top:4px;font-size:.85rem;font-weight:500;color:var(--muted);letter-spacing:0}
+.tag{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:700;vertical-align:middle;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);letter-spacing:0}
+.rel h3{margin-bottom:12px}
+.rel ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.rel li{padding-left:22px;position:relative;color:var(--muted)}
+.rel li::before{content:"";position:absolute;left:0;top:.7em;width:10px;height:2px;background:var(--accent)}
+
+/* unduh & kritik */
+.get{border:1px solid var(--line);border-radius:24px;padding:56px 40px;text-align:center;background:var(--bg2)}
+.get p{margin:14px auto 0;max-width:30em;color:var(--muted)}
+.get .actions{justify-content:center}
+.fb{max-width:560px}
+.fb label{display:block;margin:20px 0 6px;font-weight:600;font-size:.95rem}
+.fb input,.fb select,.fb textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.fb textarea{min-height:140px;resize:vertical}
+.fb .btn{margin-top:24px}
+#fbmsg{margin-top:14px;font-size:.92rem;color:var(--muted)}
+
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px 24px}
+footer .l{display:flex;flex-direction:column;gap:2px}
+footer a{text-decoration:none;font-weight:600;color:var(--ink)}
+footer a:hover{color:var(--accent)}
+
+@media (max-width:900px){
+  .hero .wrap,.split{grid-template-columns:1fr;gap:48px}
+  .tools{grid-template-columns:repeat(2,1fr)}
+  .three{grid-template-columns:1fr;gap:32px}
+  section{padding:56px 0}
+}
+@media (max-width:620px){
+  header .wrap{height:auto;padding-top:12px;padding-bottom:12px;flex-direction:column;align-items:flex-start;gap:8px}
+  nav{max-width:100%}
+  .cats li,.rel{grid-template-columns:1fr;gap:4px}
+  .get{padding:40px 22px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="catatan" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2.5"/><path d="M9 10h6M9 14h4"/></symbol>
+  <symbol id="todo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.5 12.3l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="kalk" viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="17" rx="2.5"/><path d="M9 8h6M9 13h.01M12 13h.01M15 13h.01M9 16.5h.01M12 16.5h.01M15 16.5h.01"/></symbol>
+  <symbol id="kal" viewBox="0 0 24 24"><rect x="4.5" y="6" width="15" height="14" rx="2.5"/><path d="M4.5 10.5h15M9 3.5v4M15 3.5v4"/></symbol>
+  <symbol id="uang" viewBox="0 0 24 24"><path d="M5 9h13l-3-3M19 15H6l3 3"/></symbol>
+  <symbol id="terj" viewBox="0 0 24 24"><rect x="4" y="4.5" width="10" height="8" rx="2"/><rect x="10" y="11.5" width="10" height="8" rx="2"/><path d="M7 8.5h4M13 15.5h4"/></symbol>
+  <symbol id="file" viewBox="0 0 24 24"><rect x="7" y="3.5" width="10" height="11" rx="2"/><path d="M5 19h14M15.5 16.5L18 19l-2.5 2.5M10 8h4"/></symbol>
+  <symbol id="set" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2" fill="currentColor"/><circle cx="15" cy="16" r="2" fill="currentColor"/></symbol>
+</svg>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#beranda"><i><svg viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="11" rx="2.5"/><path d="M9 8V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2M3.5 13h17"/></svg></i>HToolbox</a>
+    <nav aria-label="Menu utama">
+      <a href="#beranda">Beranda</a>
+      <a href="#alat">Alat</a>
+      <a href="#tampilan">Tampilan</a>
+      <a href="#pembaruan">Pembaruan</a>
+      <a href="#unduh">Unduh</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- BERANDA -->
+<div class="view" id="v-beranda">
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Semua alat harian, dalam satu aplikasi.</h1>
+      <p class="lead">HToolbox menyatukan catatan, to-do, kalkulator, kalender, konverter mata uang, penerjemah, dan 16 alat PDF di satu tempat. Ringan, rapi, dan buka dengan satu ketukan.</p>
+      <div class="actions">
+        <a class="btn btn-main" id="dl2" href="#unduh">Unduh untuk Android</a>
+        <a class="btn btn-line" href="#alat">Lihat semua alat</a>
+      </div>
+      <p class="note">Untuk Android 7.0 ke atas.</p>
+    </div>
+    <div class="phone" role="img" aria-label="Tampilan beranda aplikasi HToolbox">
+      <div class="screen">
+        <div class="top"><b>Toolbox</b><span></span></div>
+        <div class="grid2">
+          <div class="mini k-catatan"><div class="ic"><svg><use href="#catatan"/></svg></div>Catatan</div>
+          <div class="mini k-todo"><div class="ic"><svg><use href="#todo"/></svg></div>To-do</div>
+          <div class="mini k-kalk"><div class="ic"><svg><use href="#kalk"/></svg></div>Kalkulator</div>
+          <div class="mini k-kal"><div class="ic"><svg><use href="#kal"/></svg></div>Kalender</div>
+          <div class="mini k-uang"><div class="ic"><svg><use href="#uang"/></svg></div>Konverter Mata Uang</div>
+          <div class="mini k-terj"><div class="ic"><svg><use href="#terj"/></svg></div>Penerjemah</div>
+          <div class="mini k-file"><div class="ic"><svg><use href="#file"/></svg></div>Konverter File</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ALAT -->
+<div class="view" id="v-alat">
+<section class="alt">
+  <div class="wrap">
+    <div class="head">
+      <h2>Alat yang dipakai setiap hari</h2>
+      <p>Tidak perlu memasang tujuh aplikasi terpisah. Semuanya ada di beranda yang sama, dengan tampilan yang seragam.</p>
+    </div>
+    <div class="tools">
+      <div class="tool k-catatan"><div class="ic"><svg><use href="#catatan"/></svg></div><h3>Catatan</h3><p>Tulis, simpan, dan hapus banyak catatan sekaligus. Tersimpan permanen di HP.</p></div>
+      <div class="tool k-todo"><div class="ic"><svg><use href="#todo"/></svg></div><h3>To-do</h3><p>Daftar tugas sederhana untuk hal yang harus selesai hari ini.</p></div>
+      <div class="tool k-kalk"><div class="ic"><svg><use href="#kalk"/></svg></div><h3>Kalkulator</h3><p>Hitung cepat, dengan mode lain dan riwayat perhitungan.</p></div>
+      <div class="tool k-kal"><div class="ic"><svg><use href="#kal"/></svg></div><h3>Kalender</h3><p>Lihat tanggal dan rencanakan hari tanpa membuka aplikasi lain.</p></div>
+      <div class="tool k-uang"><div class="ic"><svg><use href="#uang"/></svg></div><h3>Konverter mata uang</h3><p>Ubah satu mata uang ke mata uang lain, tukar posisi, dan simpan favorit.</p></div>
+      <div class="tool k-terj"><div class="ic"><svg><use href="#terj"/></svg></div><h3>Penerjemah</h3><p>Terjemahkan teks dan baca tulisan dari gambar, termasuk huruf Jepang, Korea, dan Tionghoa.</p></div>
+      <div class="tool k-file"><div class="ic"><svg><use href="#file"/></svg></div><h3>Konverter file</h3><p>Gabung, pisah, kompres, dan ubah format PDF, Word, dan gambar.</p></div>
+      <div class="tool k-set"><div class="ic"><svg><use href="#set"/></svg></div><h3>Pengaturan</h3><p>Atur tema, tata letak beranda, urutan alat, dan warna ikon.</p></div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="wrap split">
+    <div>
+      <h2>16 alat PDF, langsung di HP</h2>
+      <p class="lead" style="margin-top:14px">Pilih file, atur opsinya, lalu tekan satu tombol. Hasilnya bisa langsung dibuka atau dibagikan.</p>
+      <ul class="facts">
+        <li>Diproses di perangkatmu, file tidak perlu diunggah ke server.</li>
+        <li>Pratinjau halaman pertama dan jumlah halaman sebelum dikonversi.</li>
+        <li>Simpan hasil di Download/HToolbox atau folder pilihanmu sendiri.</li>
+      </ul>
+    </div>
+    <ul class="cats">
+      <li style="--d:var(--c-atur)"><b>Atur PDF</b><span>Gabungkan, pisah, hapus halaman, ekstrak halaman</span></li>
+      <li style="--d:var(--c-opt)"><b>Optimalkan</b><span>Kompres PDF</span></li>
+      <li style="--d:var(--c-ke)"><b>Ke PDF</b><span>JPG ke PDF, Word ke PDF</span></li>
+      <li style="--d:var(--c-dari)"><b>Dari PDF</b><span>PDF ke JPG, PDF ke Word, PDF ke teks</span></li>
+      <li style="--d:var(--c-edit)"><b>Edit PDF</b><span>Putar, nomor halaman, watermark</span></li>
+      <li style="--d:var(--c-aman)"><b>Keamanan</b><span>Proteksi dengan password, buka kunci</span></li>
+      <li style="--d:var(--c-terj)"><b>Gambar</b><span>JPG ke PNG</span></li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<!-- TAMPILAN -->
+<div class="view" id="v-tampilan">
+<section>
+  <div class="wrap">
+    <div class="head"><h2>Tampilan yang bisa kamu atur sendiri</h2></div>
+    <div class="three">
+      <div>
+        <div class="swatch" aria-hidden="true"><i style="--s:#2563eb"></i><i style="--s:#0d9488"></i><i style="--s:#db2777"></i><i style="--s:#d97706"></i></div>
+        <h3>Tema dan warna ikon</h3>
+        <p>Pilih mode terang atau gelap, lalu satu warna ikon untuk semua alat atau biarkan tiap alat punya warnanya sendiri.</p>
+      </div>
+      <div>
+        <div class="lay" aria-hidden="true"><i></i><i></i><i></i></div>
+        <h3>Tata letak beranda</h3>
+        <p>Tampilkan alat sebagai daftar, kotak dua kolom, atau kotak tiga kolom sesuai selera.</p>
+      </div>
+      <div>
+        <div class="swatch" aria-hidden="true"><i style="--s:var(--ink)"></i><i style="--s:var(--line)"></i></div>
+        <h3>Urutan dan alat yang tampil</h3>
+        <p>Susun ulang alat, dan sembunyikan yang jarang kamu pakai supaya beranda tetap bersih.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- PEMBARUAN -->
+<div class="view" id="v-pembaruan">
+<section>
+  <div class="wrap">
+    <div class="head">
+      <h2>Pembaruan</h2>
+      <p>Catatan perubahan HToolbox, diurutkan dari versi terbaru.</p>
+    </div>
+    <ol class="log">
+      <!-- Tambah versi baru di paling atas: salin satu blok <li class="rel"> -->
+      <li class="rel">
+        <div class="ver">v1.0.0<span class="tag">Terbaru</span><small>2026</small></div>
+        <div>
+          <h3>Rilis perdana</h3>
+          <ul>
+            <li>Tujuh alat harian: catatan, to-do, kalkulator, kalender, konverter mata uang, penerjemah, dan konverter file.</li>
+            <li>16 alat PDF yang diproses langsung di perangkat.</li>
+            <li>Pengaturan tema terang/gelap, warna ikon, tata letak beranda, serta urutan dan visibilitas alat.</li>
+          </ul>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+</div>
+
+<!-- UNDUH -->
+<div class="view" id="v-unduh">
+<section>
+  <div class="wrap">
+    <div class="get">
+      <h2>Pasang HToolbox</h2>
+      <p>Gratis dan tanpa akun. Tersedia untuk Android 7.0 ke atas.</p>
+      <div class="actions">
+        <a id="dl" class="btn btn-main" href="#unduh" aria-disabled="true">Segera hadir</a>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- KRITIK & SARAN -->
+<div class="view" id="v-kritik">
+<section>
+  <div class="wrap">
+    <div class="head fb">
+      <h2>Kritik &amp; Saran</h2>
+      <p>Ada bug, ide fitur, atau unek-unek? Tulis di sini, semuanya dibaca.</p>
+      <label for="fbtype">Jenis</label>
+      <select id="fbtype"><option>Saran fitur</option><option>Laporan bug</option><option>Kritik</option><option>Lainnya</option></select>
+      <label for="fbtext">Pesan</label>
+      <textarea id="fbtext" placeholder="Tulis pesanmu..."></textarea>
+      <button class="btn btn-main" id="fbsend" type="button">Kirim</button>
+      <p id="fbmsg" role="status"></p>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="l">
+      <span>© 2026 HToolbox. All rights reserved.</span>
+      <span>Developed by Hieldev</span>
+    </div>
+    <a href="#kritik">Kritik &amp; Saran</a>
+  </div>
+</footer>
+
+<script>
+// Isi alamat unduhan (APK / Play Store), tombol akan aktif otomatis.
+var DOWNLOAD_URL = "https://github.com/Hieldev/HTb-/releases/download/V1.0.0/HTb-signed.apk";
+// Isi email tujuan kritik & saran.
+var FEEDBACK_EMAIL = "";
+
+(function () {
+  if (DOWNLOAD_URL) {
+    ["dl","dl2"].forEach(function (id) {
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.href = DOWNLOAD_URL;
+      b.setAttribute("download","");
+      b.textContent = "Unduh untuk Android";
+      b.removeAttribute("aria-disabled");
+    });
+  }
+
+  var names = ["beranda","alat","tampilan","pembaruan","unduh","kritik"];
+  function show() {
+    var h = (location.hash || "").replace("#","");
+    if (names.indexOf(h) < 0) h = "beranda";
+    names.forEach(function (n) {
+      document.getElementById("v-" + n).classList.toggle("on", n === h);
+    });
+    document.querySelectorAll("nav a").forEach(function (a) {
+      if (a.getAttribute("href") === "#" + h) a.setAttribute("aria-current","page");
+      else a.removeAttribute("aria-current");
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", show);
+  show();
+
+  var send = document.getElementById("fbsend"), msg = document.getElementById("fbmsg");
+  send.addEventListener("click", function () {
+    var t = document.getElementById("fbtext").value.trim();
+    if (!t) { msg.textContent = "Tulis pesanmu dulu ya."; return; }
+    if (!FEEDBACK_EMAIL) { msg.textContent = "Fitur kirim belum aktif. Alamat email belum diatur."; return; }
+    var s = "HToolbox: " + document.getElementById("fbtype").value;
+    location.href = "mailto:" + FEEDBACK_EMAIL + "?subject=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(t);
+  });
+})();
+</script>
+</body>
+</html>

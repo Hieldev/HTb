@@ -371,6 +371,8 @@ footer a:hover{color:var(--accent)}
 var DOWNLOAD_URL = "https://github.com/Hieldev/HTb-/releases/download/V1.0.0/HTb-signed.apk";
 // Isi email tujuan kritik & saran.
 var FEEDBACK_EMAIL = "hlmannsdkin@gmail.com";
+// Access key dari web3forms.com (dikirim ke emailmu). Kalau diisi, pesan terkirim langsung tanpa buka Gmail.
+var FORM_KEY = "b62cbc4e-a1fd-430b-8ff5-61b95e640cbe";
 
 (function () {
   if (DOWNLOAD_URL) {
@@ -404,9 +406,32 @@ var FEEDBACK_EMAIL = "hlmannsdkin@gmail.com";
   send.addEventListener("click", function () {
     var t = document.getElementById("fbtext").value.trim();
     if (!t) { msg.textContent = "Tulis pesanmu dulu ya."; return; }
+    if (FORM_KEY) {
+      var ty = document.getElementById("fbtype").value;
+      send.disabled = true;
+      msg.textContent = "Mengirim...";
+      fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ access_key: FORM_KEY, subject: "HToolbox: " + ty, from_name: "HToolbox", jenis: ty, message: t })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.success) { msg.textContent = "Terkirim, terima kasih!"; document.getElementById("fbtext").value = ""; }
+        else { msg.textContent = "Gagal mengirim. Coba lagi nanti."; }
+      }).catch(function () { msg.textContent = "Gagal mengirim. Cek koneksi lalu coba lagi."; })
+        .then(function () { send.disabled = false; });
+      return;
+    }
     if (!FEEDBACK_EMAIL) { msg.textContent = "Fitur kirim belum aktif. Alamat email belum diatur."; return; }
     var s = "HToolbox: " + document.getElementById("fbtype").value;
-    location.href = "mailto:" + FEEDBACK_EMAIL + "?subject=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(t);
+    var gm = "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(FEEDBACK_EMAIL) + "&su=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(t);
+    var mt = "mailto:" + FEEDBACK_EMAIL + "?subject=" + encodeURIComponent(s) + "&body=" + encodeURIComponent(t);
+    window.open(gm, "_blank", "noopener");
+    msg.textContent = "Gmail dibuka di tab baru, tekan Kirim di sana. Kalau tidak muncul, ";
+    var a = document.createElement("a");
+    a.href = mt;
+    a.textContent = "coba lewat aplikasi email";
+    msg.appendChild(a);
+    msg.appendChild(document.createTextNode("."));
   });
 })();
 </script>
